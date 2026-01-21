@@ -1,10 +1,11 @@
 from datetime import datetime
 from pathlib import Path
 
-from extractor import Extractor
-from loader import load_data
-from parsers import parse_home_sales
-from utils.log import logger
+import yaml
+
+from .extractor import Extractor
+from .parsers import parse_home_sales
+from .utils.log import logger
 
 
 def extraction_featured_books(output_dir: Path):
@@ -20,14 +21,32 @@ def extraction_featured_books(output_dir: Path):
     logger.info("Extraction complete!")
 
 
+def extract_link_content():
+    extract = Extractor()
+    with open("data/config.yml", "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    hrefs = cfg.get("hrefs", [])
+    links = [item["link"] for item in hrefs if "link" in item]
+    for link in links[:1]:
+        html = extract.make_request(url=link, mode="text")
+    return html
+
+
 if __name__ == "__main__":
-    path = "/media/lucas/Files/2.Projetos/0.mylake/raw/vide"
+    from bs4 import BeautifulSoup
+    # path = "/media/lucas/Files/2.Projetos/0.mylake/raw/vide"
 
-    extraction_featured_books(path)
+    # extraction_featured_books(path)
 
-    load_data(
-        dir=path,
-        file_extension="json",
-        schema="raw",
-        table_name="vide_raw_livros_em_destaque",
-    )
+    # load_data(
+    #     dir=path,
+    #     file_extension="json",
+    #     schema="raw",
+    #     table_name="vide_raw_livros_em_destaque",
+    # )
+    html = extract_link_content()
+    soup = BeautifulSoup(html, "html.parser")
+    html = soup.prettify()
+    with open("data/content_page.html", "w", encoding="utf-8") as f:
+        f.write(html)

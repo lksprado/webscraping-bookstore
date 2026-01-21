@@ -7,7 +7,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 
-from utils.log import logger
+from .utils.log import logger
 
 
 class Extractor:

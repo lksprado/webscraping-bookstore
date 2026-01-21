@@ -5,7 +5,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
-from utils.log import logger
+from .utils.log import logger
 
 
 def load_data(
@@ -60,3 +60,14 @@ def load_data(
         raise Exception(f"Failed to load data to database: {e}")
 
     engine.dispose()
+
+
+if __name__ == "__main__":
+    ## LOAD NO LEGADO
+    filpath = "/media/lucas/Files/2.Projetos/0.mylake/raw/vide/legacy"
+    load_data(
+        dir=filpath,
+        file_extension="csv",
+        schema="raw",
+        table_name="vide_raw_all_books_legacy",
+    )
