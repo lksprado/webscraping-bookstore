@@ -15,11 +15,11 @@ def load_data(
 
     import os
 
-    DB_HOST = os.getenv("DB_HOST")
-    DB_PORT = os.getenv("DB_PORT")
-    DB_NAME = os.getenv("DB_NAME")
-    DB_USER = os.getenv("DB_USER")
-    DB_PW = os.getenv("DB_PW")
+    DB_HOST = os.getenv("DB_HOST")  # noqa: N806
+    DB_PORT = os.getenv("DB_PORT")  # noqa: N806
+    DB_NAME = os.getenv("DB_NAME")  # noqa: N806
+    DB_USER = os.getenv("DB_USER")  # noqa: N806
+    DB_PW = os.getenv("DB_PW")  # noqa: N806
 
     # Engine para to_sql
     engine = create_engine(

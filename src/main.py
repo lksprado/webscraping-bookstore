@@ -28,9 +28,10 @@ def extract_link_content():
 
     hrefs = cfg.get("hrefs", [])
     links = [item["link"] for item in hrefs if "link" in item]
-    for link in links[:1]:
+    for link in links:
         html = extract.make_request(url=link, mode="text")
-    return html
+
+        return html
 
 
 if __name__ == "__main__":
