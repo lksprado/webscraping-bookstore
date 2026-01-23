@@ -1,5 +1,5 @@
 from datetime import datetime
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -11,7 +11,7 @@ def get_routes():
     """
     Obter o "historia.html" em Devtools > Sources
     """
-    BASE_URL = "https://videeditorial.com.br/"
+    BASE_URL = "https://videeditorial.com.br/"  # noqa: N806
 
     with open("data/historia.html", "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
@@ -42,6 +42,35 @@ def get_routes():
     df.to_csv(f"data/all_hrefs_{created_at}.csv", sep=";", index=False)
 
 
+def get_last_page_number(response: str) -> int:
+    """Obtem ultima paginacao"""
+    soup = BeautifulSoup(response, "html.parser")
+
+    container = soup.select_one("div.pagination.bottom div.links")
+
+    if not container:
+        # não tem paginação → só 1 página
+        return 1
+
+    page_numbers = []
+
+    for a in container.select("a[href]"):
+        href = a["href"]
+
+        # exemplo: /filosofia?page=37
+        if "page=" in href:
+            qs = parse_qs(urlparse(href).query)
+            page = qs.get("page", [None])[0]
+
+            if page and page.isdigit():
+                page_numbers.append(int(page))
+
+    if not page_numbers:
+        return 1
+
+    return max(page_numbers)
+
+
 def parse_products_page(
     response: str,
     *,
@@ -50,13 +79,14 @@ def parse_products_page(
     source: str,
     has_category: bool = False,
 ) -> list:
+    """Parser genérico de lista de produtos"""
     soup = BeautifulSoup(response, "html.parser")
     products = []
 
     # Categoria (só para páginas de categoria)
     category_name = None
     if has_category:
-        category_tag = soup.select_one(".back-category a")
+        category_tag = soup.select_one("#column-right .back-category a")
         category_name = category_tag.get_text(strip=True) if category_tag else None
 
     container = soup.select_one(container_selector)
@@ -118,11 +148,12 @@ def parse_products_page(
 
         products.append(product)
 
-    logger.info(f"[{source}] Retrieved {len(products)} registers.")
+    logger.info(f"[{source}] Retrieved {len(products) - 1} registers.")
     return products
 
 
 def parse_home_sales(response) -> list:
+    """Parsea a lista de livros da home page"""
     return parse_products_page(
         response,
         container_selector="div.box.product_featured",
@@ -133,6 +164,7 @@ def parse_home_sales(response) -> list:
 
 
 def parse_content_pages(response) -> list:
+    """Parsea a lista de livros de categoria"""
     return parse_products_page(
         response,
         container_selector="div.product-list",
@@ -140,11 +172,3 @@ def parse_content_pages(response) -> list:
         source="category_page",
         has_category=True,
     )
-
-
-if __name__ == "__main__":
-    # get_routes()
-    with open("data/content_page.html", "r", encoding="utf-8") as f:
-        books = parse_content_pages(f)
-
-    print(books)

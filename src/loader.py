@@ -38,11 +38,16 @@ def load_data(
             continue
 
         if file_extension == "csv":
-            dfs.append(pd.read_csv(file, encoding="utf-8"))
+            df = pd.read_csv(file, encoding="utf-8")
 
         elif file_extension == "json":
-            dfs.append(pd.read_json(file, encoding="utf-8"))
+            df = pd.read_json(file, encoding="utf-8")
 
+        else:
+            continue
+
+        df["source_filename"] = file.name
+        dfs.append(df)
     if not dfs:
         logger.warning("No files found.")
         return
