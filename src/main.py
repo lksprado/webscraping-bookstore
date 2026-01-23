@@ -12,6 +12,8 @@ from .utils.log import logger
 
 
 def extraction_featured_books(output_dir: Path):
+    output_dir = Path(output_dir)
+
     url_base = "https://videeditorial.com.br/"
     extract = Extractor()
     html = extract.make_request(url=url_base, mode="text")
@@ -24,12 +26,14 @@ def extraction_featured_books(output_dir: Path):
     logger.info("Extraction complete!")
 
 
-def extract_link_content(output_dir: Path):
+def extract_link_content(output_dir: Path, config_file: Path):
+    output_dir = Path(output_dir)
+    config_file = Path(config_file)
     extract = Extractor()
 
     file_date = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime("%Y-%m-%d")
 
-    with open("src/config.yml", "r", encoding="utf-8") as f:
+    with open(config_file, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
     hrefs = cfg.get("hrefs", [])
@@ -65,11 +69,14 @@ def extract_link_content(output_dir: Path):
     logger.info("Extraction complete!")
 
 
-def extract_one_category_content(name: str, output_dir: Path):
+def extract_one_category_content(name: str, output_dir: Path, config_file: Path):
+    output_dir = Path(output_dir)
+    config_file = Path(config_file)
+
     extract = Extractor()
     file_date = datetime.now(tz=ZoneInfo("America/Sao_Paulo")).strftime("%Y-%m-%d")
 
-    with open("src/config.yml", "r", encoding="utf-8") as f:
+    with open(config_file, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
     hrefs = cfg.get("hrefs", [])
